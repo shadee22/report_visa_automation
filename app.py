@@ -7,12 +7,29 @@ import numpy as np
 import matplotlib.ticker as mticker
 
 
+
+
+# Callback function to update the title when the client name changes
+
+
 def load_datasets():
     # Sidebar file uploaders
     st.sidebar.write("### Upload CSV Files (Required)")
-    card_file = st.sidebar.file_uploader("Upload Visa Japan Cards CSV", type="csv")
-    transaction_file = st.sidebar.file_uploader("Upload Visa Japan Eligible Transactions CSV", type="csv")
-    redemption_file = st.sidebar.file_uploader("Upload Visa Japan Redemptions CSV", type="csv")
+    client_options = ["VISA Japan", "Suncorp"]
+    selected_client = st.sidebar.radio(
+        "Client Name",
+        client_options,
+        # index=client_options.index(st.session_state.client_name),
+    )
+
+    st.session_state.client_name = selected_client
+
+
+
+    card_file = st.sidebar.file_uploader(f"Upload {selected_client} Cards CSV", type="csv")
+    transaction_file = st.sidebar.file_uploader(f"Upload {selected_client} Eligible Transactions CSV", type="csv")
+    redemption_file = st.sidebar.file_uploader(f"Upload {selected_client} Redemptions CSV", type="csv")
+
 
     # Check if all required files are uploaded
     if card_file is not None and transaction_file is not None and redemption_file is not None:
@@ -508,10 +525,16 @@ def display_total_redemptions_value_by_merchants_plot(redemption_df):
 
 def main():
     today_date = datetime.now().strftime('%B %d, %Y')
-    st.title(f"Visa Japan Campaign Analysis {today_date}")
 
-    # Load datasets from either uploaded files or default paths
+    # Ensure client_name is initialized
+    if 'client_name' not in st.session_state:
+        st.session_state.client_name = "VISA Japan"
+
+    # Load datasets
     card_df, transaction_df, redemption_df = load_datasets()
+
+    # Title with updated client name
+    st.title(f"{st.session_state.client_name} Analysis - {today_date}")
 
     # Check if all required files are uploaded
     if card_df is not None and transaction_df is not None and redemption_df is not None:
